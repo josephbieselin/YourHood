@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Signup to YourHood</title>
+
+    <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
+ 
+    <link href="http://getbootstrap.com/examples/jumbotron-narrow/jumbotron-narrow.css" rel="stylesheet">
+    <link href="../static/signup.css" rel="stylesheet">
+
+    <script src="../static/js/jquery-3.1.1.min.js"></script>
+    <!-- <script src="../static/js/signup.js"></script> -->
+</head>
+
+<body>
+	<div class="container">
+      <div class="header">
+        <nav>
+          <ul class="nav nav-pills pull-right">
+            <li role="presentation" ><a href="/userHome">Home</a></li>
+            <li role="presentation"><a href="/showSignin">Sign In</a></li>
+            <li role="presentation" class="active"><a href="#">Sign Up</a></li>
+          </ul>
+        </nav>
+      </div>
+ 
+      <div class="jumbotron">
+        <h1>YourHood Signup</h1>
+        <form class="form-signin" action="/signUp" method="post">
+	        <label for="username" class="sr-only">Username</label>
+	        <input type="name" name="username" id="username" class="form-control" placeholder="username" required autofocus>
+
+	        <label for="email" class="sr-only">Email address</label>
+	        <input type="email" name="email" id="email" class="form-control" placeholder="your@email.address" required autofocus>
+
+	        <label for="password" class="sr-only">Password</label>
+	        <input type="password" name="password" id="password" class="form-control" placeholder="password" required>
+
+	        <label for="zipcode" class="sr-only">Zip Code</label>
+	        <input type="text" name="zipcode" id="zipcode" class="form-control" placeholder="zip code" size="5" pattern="[0-9]{5}" required>
+
+	        <button id="btnSignUp" class="btn btn-lg btn-primary btn-block" type="submit">Sign up</button>
+      	</form>
+      </div>
+ 
+       
+ 
+      <footer class="footer">
+        <p>YourHood</p>
+      </footer>
+ 
+    </div>
+</body>
+</html>

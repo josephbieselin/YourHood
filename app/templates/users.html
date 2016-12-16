@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>YourHood</title>
+
+   
+    <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="http://getbootstrap.com/examples/jumbotron-narrow/jumbotron-narrow.css" rel="stylesheet">
+    <link href="../static/css/signup.css" rel="stylesheet">
+
+    <script src="../static/js/jquery-3.1.1.min.js"></script>
+    
+  </head>
+
+  <body>
+
+    <div class="container">
+      <div class="header">
+        <nav>
+          <ul class="nav nav-pills pull-right">
+            <li role="presentation"><a href="/userHome">Home</a></li>
+            <li role="presentation"><a href="/editProfile">Edit Profile</a></li>
+            <li role="presentation"><a href="/showFriendRequests">Friend Requests</a></li>
+            <li role="presentation"><a href="/showSignin">Sign In</a></li>
+            <li role="presentation"><a href="/showSignup">Sign Up</a></li>
+            <li role="presentation"><a href="/logout">Logout</a></li>
+          </ul>
+        </nav>
+      </div>
+
+      <div class="jumbotron">
+        <h1>Users from your search</h1>
+      </div>
+
+      <table border="1">
+      {% for user in users %}
+        <tr>
+          <a href="/users/{{user[0]}}">{{user[0]}}</a>
+        </tr>
+      {% endfor %}
+      </table>
+      
+      <footer class="footer">
+        <p>YourHood</p>
+      </footer>
+
+    </div>
+  </body>
+</html>
