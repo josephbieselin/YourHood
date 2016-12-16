@@ -99,12 +99,34 @@ def userPage(username):
 		cursor = conn.cursor()
 
 		# get the profile of the current session's user
-		cursor.callproc('showUsers', [value,])
+		cursor.callproc('areFriends', (session.get('user'), username))
 
 		data = cursor.fetchall()
-		# data = [[username], [username], ...]
+		# data = [[username, friend]]
 
-		return render_template('users.html', users = data)
+		# 0 = Nothing, 1 = Friends, 2 = Logged In User has Friend request from searched user, 3 = Logged In User has requested to be Friends with the searched user
+		friendStatus = 0
+
+		# users are not friends
+		if len(data) is 0:
+			cursor.callproc('friendRequested', (session.get('user'), username))
+
+			data = cursor.fetchall()
+			# data = [[requester, requestee]]
+			requester = data[0][0]
+			requestee = data[0][1]
+
+			# there is some kind of request
+			if len(data) > 0:
+				if requester == username:
+					friendStatus = 2
+				else:
+					friendStatus = 3
+		# users are friends
+		else:
+			friendStatus = 1
+
+		return render_template('userPage.html', otherUser = username, friendStatus = friendStatus)
 	
 	except Exception as e:
 		return render_template('error.html', error = str(e))
@@ -112,7 +134,7 @@ def userPage(username):
 	finally:
 		cursor.close()
 		conn.close()
-		
+
 def getProfileData(data, index):
 	'''Returns the value from the current user's profile'''
 	# # SQL NULL values are represented as None in Python

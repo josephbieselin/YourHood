@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>YourHood</title>
+
+   
+    <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="http://getbootstrap.com/examples/jumbotron-narrow/jumbotron-narrow.css" rel="stylesheet">
+    <link href="../static/css/signup.css" rel="stylesheet">
+
+    <script src="../static/js/jquery-3.1.1.min.js"></script>
+    
+  </head>
+
+  <body>
+
+
+
+    <div class="container">
+      <form action="/search" method="post">
+
+        <label for="search_type" class="sr-only">Search Type</label>
+        <select name="search_type" id="search_type">
+          <option value="users">Users</option>
+          <option value="hood_messages">Users</option>
+          <option value="friend_messages">Users</option>
+        </select>
+
+        <div class="input-group">
+          <input type="text" name="search_value" id="search_value" class="form-control" placeholder="Search" required>
+          <div class="input-group-btn">
+            <button class="btn btn-default" type="submit"><i class="glyphicon glyphicon-search"></i></button>
+          </div>
+        </div>
+
+      </form>
+    </div>
+
+    <div class="container">
+      <div class="header">
+        <nav>
+          <ul class="nav nav-pills pull-right">
+            <li role="presentation"><a href="/userHome">Home</a></li>
+            <li role="presentation"><a href="/editProfile">Edit Profile</a></li>
+            <li role="presentation"><a href="/showFriendRequests">Friend Requests</a></li>
+            <li role="presentation"><a href="/showSignin">Sign In</a></li>
+            <li role="presentation"><a href="/showSignup">Sign Up</a></li>
+            <li role="presentation"><a href="/logout">Logout</a></li>
+          </ul>
+        </nav>
+      </div>
+
+      <div class="jumbotron">
+        <h1>{{otherUser}}'s page</h1>
+      </div>
+
+      
+      {% if friendStatus == 0 %}
+      <form action="/requestFriend" method="post">
+        <div class="input-group">
+          <input type="hidden" name="requestFriend" id="requestFriend" class="form-control" value="{{otherUser}}" required>
+          <div class="input-group-btn">
+            <button class="btn btn-default" type="submit">Add Friend</button>
+          </div>
+        </div>
+      </form>
+      {% endif %}
+
+      {% if friendStatus == 1 %}
+      <h2>Friends</h2>
+      {% endif %}
+
+      {% if friendStatus == 2 %}
+      <form action="/acceptFriend" method="post">
+        <div class="input-group">
+          <input type="hidden" name="requester" id="requester" class="form-control" value="{{otherUser}}" required>
+          <div class="input-group-btn">
+            <button class="btn btn-default" type="submit">Add Friend</button>
+          </div>
+        </div>
+      </form>
+      <form action="/rejectFriend" method="post">
+        <div class="input-group">
+          <input type="hidden" name="requester" id="requester" class="form-control" value="{{otherUser}}" required>
+          <div class="input-group-btn">
+            <button class="btn btn-default" type="submit">Reject Friend</button>
+          </div>
+        </div>
+      </form>      
+      {% endif %}
+
+      {% if friendStatus == 1 %}
+      <h2>Friend Request Sent</h2>
+      {% endif %}
+
+
+
+      
+      <footer class="footer">
+        <p>YourHood</p>
+      </footer>
+
+    </div>
+  </body>
+</html>
