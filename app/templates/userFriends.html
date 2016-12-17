@@ -41,10 +41,10 @@
           <ul class="nav nav-pills pull-right">
             <li role="presentation"><a href="/userHome">Home</a></li>
             <li role="presentation"><a href="/userHood">Neighborhood</a></li>
-            <li role="presentation"><a href="/userFriends">Friends</a></li>
+            <li role="presentation" class="active"><a href="#">Friends</a></li>
             <li role="presentation"><a href="/userFOF">Friends of Friends</a></li>
             <li role="presentation"><a href="/editProfile">Edit Profile</a></li>
-            <li role="presentation" class="active"><a href="#">Friend Requests</a></li>
+            <li role="presentation"><a href="/showFriendRequests">Friend Requests</a></li>
             <li role="presentation"><a href="/showSignin">Sign In</a></li>
             <li role="presentation"><a href="/showSignup">Sign Up</a></li>
             <li role="presentation"><a href="/logout">Logout</a></li>
@@ -55,25 +55,13 @@
       <br/>
 
       <div class="jumbotron">
-        <h1>Friend Requests</h1>
+        <h1>Friends</h1>
       </div>
 
       <table border="1">
-      {% for requester in requests %}
+      {% for user in users %}
         <tr>
-          <td>{{requester[0]}}<td>
-          <td>
-            <form action="/acceptFriend" method="post">
-              <input type="hidden" name="requester" id="requester" value="{{requester[0]}}">
-              <button type="submit">Accept</button>
-            </form>
-          </td>
-          <td>
-            <form action="/rejectFriend" method="post">
-              <input type="hidden" name="requester" id="requester" value="{{requester[0]}}">
-              <button type="submit">Reject</button>
-            </form>
-          </td>
+          <td><a href="/users/{{user[0]}}">{{user[0]}}</a></td>
         </tr>
       {% endfor %}
       </table>

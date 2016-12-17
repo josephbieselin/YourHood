@@ -35,10 +35,27 @@ def signin():
 def home():
 	'''Show the user's home page if they are signed in via a session; else return the error page'''
 	if session.get('user'):
-		return render_template('userHome.html', username = session.get('user'))
+
+		try:
+			conn = mysql.connect()
+			cursor = conn.cursor()
+
+			cursor.callproc('showUserMessages', [session.get('user'), ])
+
+			data = cursor.fetchall()
+			# data = [[poster, title, body, msgloc, multimedia, msgtime, visibility, reply], ....]
+
+			return render_template('userHome.html', username = session.get('user'), messages = data)
+		
+		except Exception as e:
+			return render_template('error.html', error = str(e))
+
+		finally:
+			cursor.close()
+			conn.close()
+
 	else:
 		return render_template('error.html', error = 'Unauthorized Access: please sign in or sign up first.')
-
 
 
 '''
@@ -83,9 +100,75 @@ def searchUsers(value):
 		cursor.close()
 		conn.close()
 
+@app.route('/search_hood_messages/<string:value>')
+def searchHoodMessages(value):
+	'''Show the messages that have 'value' in the user's hood'''
+	try:
+		conn = mysql.connect()
+		cursor = conn.cursor()
+
+		cursor.callproc('getNeighborhood', [session.get('user'), ])
+
+		data = cursor.fetchall()
+		# data = [[lid, zip, city, state, name, longitude, latitude], ....]
+
+		lid = getData(data, 0)
+		zipcode = getData(data, 1)
+		city = getData(data, 2)
+		state = getData(data, 3)
+		name = getData(data, 4)
+		longitude = getData(data, 5)
+		latitude = getData(data, 6)
+
+		# SQL LIKE filters with %filter_str%
+		value = '%' + value + '%'
+
+		# get the profile of the current session's user
+		cursor.callproc('showNeighborhoodMessages', (session.get('user'), value, None, None))
+
+		data = cursor.fetchall()
+		# data = [[username], [username], ...]
+
+		return render_template('userHood.html', username = session.get('user'), hood_id = lid, hood_name = name, messages = data)
+	
+	except Exception as e:
+		return render_template('error.html', error = str(e))
+
+	finally:
+		cursor.close()
+		conn.close()
+
+@app.route('/search_friend_messages/<string:value>')
+def searchFriendMessages(value):
+	'''Show the messages that have 'value' in the user's friends' messages'''
+	try:
+		conn = mysql.connect()
+		cursor = conn.cursor()
+
+		# SQL LIKE filters with %filter_str%
+		value = '%' + value + '%'
+
+		cursor.callproc('showFriendMessages', (session.get('user'), value, None, None))
+
+		data = cursor.fetchall()
+		# data = [[poster, title, body, multimedia, msgtime], ....]
+
+		return render_template('userFriendMessages.html', messages = data)
+	
+	except Exception as e:
+		return render_template('error.html', error = str(e))
+
+	finally:
+		cursor.close()
+		conn.close()
+
+
 @app.route('/users/<string:username>')
 def userPage(username):
 	'''Shows the page of the user with username'''
+	if session.get('user') == username:
+		return redirect('/userHome')
+
 	try:
 		conn = mysql.connect()
 		cursor = conn.cursor()
@@ -166,7 +249,7 @@ def postMessageOnUserPage():
 			url = "/users/" + _user
 		else:
 			url = "/userHome"
-			
+
 		return redirect(url)
 
 	except Exception as e:
@@ -176,7 +259,108 @@ def postMessageOnUserPage():
 		cursor.close()
 		conn.close()
 
-def getProfileData(data, index):
+@app.route('/postMessageOnHood', methods=['POST'])
+def postMessageOnUserHome():	
+	'''Posts a message onto the user's hood page'''
+	#title, body, visibility, otherUser
+	_hood = request.form['hood']
+	_title = request.form['title']
+	_body = request.form['body']
+	_visibility = request.form['visibility']
+
+	try:
+		conn = mysql.connect()
+		cursor = conn.cursor()
+
+		cursor.callproc('postMessage', (session.get('user'), session.get('user'), _hood, None, _title, _body, None, _visibility))
+
+		return redirect("/userHood")
+
+	except Exception as e:
+		return render_template('error.html', error = str(e))
+
+	finally:
+		cursor.close()
+		conn.close()
+
+@app.route('/userHood')
+def userHood():
+	'''Show the user's hood page'''
+	try:
+		conn = mysql.connect()
+		cursor = conn.cursor()
+
+		cursor.callproc('getNeighborhood', [session.get('user'), ])
+
+		data = cursor.fetchall()
+		# data = [[lid, zip, city, state, name, longitude, latitude], ....]
+
+		lid = getData(data, 0)
+		zipcode = getData(data, 1)
+		city = getData(data, 2)
+		state = getData(data, 3)
+		name = getData(data, 4)
+		longitude = getData(data, 5)
+		latitude = getData(data, 6)
+		
+		cursor.callproc('showNeighborhoodMessages', (session.get('user'), None, None, None))
+
+		data = cursor.fetchall()
+		# data = [[poster, name, title, body, multimedia, msgtime], ...]
+
+		return render_template('userHood.html', username = session.get('user'), hood_id = lid, hood_name = name,  messages = data)
+	
+	except Exception as e:
+		return render_template('error.html', error = str(e))
+
+	finally:
+		cursor.close()
+		conn.close()
+
+@app.route('/userFOF')
+def userFOF():
+	'''Show the user's FOF'''
+	try:
+		conn = mysql.connect()
+		cursor = conn.cursor()
+
+		cursor.callproc('showFOFs', [session.get('user'), ])
+
+		data = cursor.fetchall()
+		# data = [[fof], ....]
+
+		return render_template('userFOF.html', users = data)
+	
+	except Exception as e:
+		return render_template('error.html', error = str(e))
+
+	finally:
+		cursor.close()
+		conn.close()
+
+@app.route('/userFriends')
+def userFriends():
+	'''Show the user's friends'''
+	try:
+		conn = mysql.connect()
+		cursor = conn.cursor()
+
+		cursor.callproc('showFriends', [session.get('user'), ])
+
+		data = cursor.fetchall()
+		# data = [[fof], ....]
+
+		return render_template('userFriends.html', users = data)
+	
+	except Exception as e:
+		return render_template('error.html', error = str(e))
+
+	finally:
+		cursor.close()
+		conn.close()
+
+
+def getData(data, index):
 	'''Returns the value from the current user's profile'''
 	# SQL NULL values are represented as None in Python
 	if (data[0][index]) is None:
@@ -198,16 +382,16 @@ def editProfile():
 		data = cursor.fetchall()
 		# data = [[username, address, city, state, fname, lname, age, bio, photo, visibility], ...]
 
-		address = getProfileData(data, 1)
-		city = getProfileData(data, 2)
-		state = getProfileData(data, 3)
-		fname = getProfileData(data, 4)
-		lname = getProfileData(data, 5)
-		age = getProfileData(data, 6)
-		bio = getProfileData(data, 7)
+		address = getData(data, 1)
+		city = getData(data, 2)
+		state = getData(data, 3)
+		fname = getData(data, 4)
+		lname = getData(data, 5)
+		age = getData(data, 6)
+		bio = getData(data, 7)
 		# TODO: implement sending of photo data
-		# photo = getProfileData(data, 8)
-		visibility = getProfileData(data, 9)
+		# photo = getData(data, 8)
+		visibility = getData(data, 9)
 
 		return render_template('editProfile.html', curr_address = address, curr_city = city, curr_state = state, curr_fname = fname, curr_lname = lname, curr_age = age, curr_bio = bio, curr_visibility = visibility)
 	
@@ -423,6 +607,15 @@ def signUp():
 		conn = mysql.connect()
 		cursor = conn.cursor()
 		
+		cursor.callproc("checkZip", [_zipcode, ])
+
+		data = cursor.fetchall()
+		# data = [[lid]]
+
+		# there is no current zip so user must make a new neighborhood
+		if len(data) is 0:
+			return render_template('newNeighborhood.html', zip = _zipcode)
+
 		if _un and _email and _pw and _zipcode:
 
 			cursor.callproc('signupUser', (_un, _email, _pw, _zipcode))
@@ -452,6 +645,40 @@ def signUp():
 	finally:
 		cursor.close()
 		conn.close()
+
+@app.route('/newHood', methods=['POST'])
+def newHood():
+	try:
+		_zip = request.form['zip']
+		_city = request.form['city']
+		_state = request.form['state']
+		_name = request.form['name']
+		_longitude = request.form['longitude']
+		_latitude = request.form['latitude']
+
+		conn = mysql.connect()
+		cursor = conn.cursor()
+		
+		cursor.callproc("createNeighborhood", (_zip, _city, _state, _name, _longitude, _latitude))
+
+		print("here\n")
+
+		data = cursor.fetchall()
+		# data = [[lid]]
+
+		# there is no current zip so user must make a new neighborhood
+		if len(data) is 0:
+			return render_template('signup.html', zip = _zip)
+		else:
+			return render_template('error.html', error="New Neighborhood creation went wrong. Please try again.")
+
+	except Exception as e:
+		# return render_template('error.html', error="Error: Neighborhood creation did not happen. Try again later.")
+		return json.dumps({'error': str(e)})
 	
+	finally:
+		cursor.close()
+		conn.close()
+
 if __name__ == '__main__':
     app.run()

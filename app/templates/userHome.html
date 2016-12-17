@@ -15,8 +15,6 @@
 
   <body>
 
-
-
     <div class="container">
       <form action="/search" method="post">
 
@@ -42,6 +40,9 @@
         <nav>
           <ul class="nav nav-pills pull-right">
             <li role="presentation"><a href="#">Home</a></li>
+            <li role="presentation"><a href="/userHood">Neighborhood</a></li>
+            <li role="presentation"><a href="/userFriends">Friends</a></li>
+            <li role="presentation"><a href="/userFOF">Friends of Friends</a></li>
             <li role="presentation"><a href="/editProfile">Edit Profile</a></li>
             <li role="presentation"><a href="/showFriendRequests">Friend Requests</a></li>
             <li role="presentation"><a href="/showSignin">Sign In</a></li>
@@ -50,6 +51,8 @@
           </ul>
         </nav>
       </div>
+
+      <br/>
 
       <div class="jumbotron">
         <h1>Hi {{username}}!</h1>
@@ -77,8 +80,26 @@
           <button id="btnPostMessage" class="btn btn-lg btn-primary btn-block" type="submit">Post</button>
         </form>  
 
-      
+      <br/>
+      <h3>Messages</h3>
 
+      <table border=1>
+        <tr>
+          <th>Poster</th>
+          <th>Title</th>
+          <th>Body</th>
+          <!-- TODO: implement support for multimedia -->
+          <th>Post Time</th>
+        </tr>
+        {% for message in messages %}
+            <tr>
+              <td><a href="/users/{{message[0]}}">{{message[0]}}</a></td>
+              <td>{{message[1]}}</td>
+              <td>{{message[2]}}</td>
+              <td>{{message[5]}}</td>
+            </tr>
+        {% endfor %}
+      </table>
       <footer class="footer">
         <p>YourHood</p>
       </footer>

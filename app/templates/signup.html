@@ -37,7 +37,7 @@
 	        <input type="password" name="password" id="password" class="form-control" placeholder="password" required>
 
 	        <label for="zipcode" class="sr-only">Zip Code</label>
-	        <input type="text" name="zipcode" id="zipcode" class="form-control" placeholder="zip code" size="5" pattern="[0-9]{5}" required>
+	        <input type="text" name="zipcode" id="zipcode" class="form-control" placeholder="zip code" size="5" pattern="[0-9]{5}" {% if zip is defined %} value="{{zip}}" {% endif %} required>
 
 	        <button id="btnSignUp" class="btn btn-lg btn-primary btn-block" type="submit">Sign up</button>
       	</form>

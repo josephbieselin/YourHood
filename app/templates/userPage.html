@@ -15,8 +15,6 @@
 
   <body>
 
-
-
     <div class="container">
       <form action="/search" method="post">
 
@@ -42,6 +40,9 @@
         <nav>
           <ul class="nav nav-pills pull-right">
             <li role="presentation"><a href="/userHome">Home</a></li>
+            <li role="presentation"><a href="/userHood">Neighborhood</a></li>
+            <li role="presentation"><a href="/userFriends">Friends</a></li>
+            <li role="presentation"><a href="/userFOF">Friends of Friends</a></li>
             <li role="presentation"><a href="/editProfile">Edit Profile</a></li>
             <li role="presentation"><a href="/showFriendRequests">Friend Requests</a></li>
             <li role="presentation"><a href="/showSignin">Sign In</a></li>
@@ -50,6 +51,8 @@
           </ul>
         </nav>
       </div>
+
+      <br/>
 
       <div class="jumbotron">
         <h1>{{otherUser}}'s page</h1>
@@ -109,7 +112,7 @@
           </tr>
           {% for message in messages %}
               <tr>
-                <td>{{message[0]}}</td>
+                <td><a href="/users/{{message[0]}}">{{message[0]}}</a></td>
                 <td>{{message[1]}}</td>
                 <td>{{message[2]}}</td>
                 <td>{{message[5]}}</td>
@@ -162,7 +165,7 @@
             <!-- Only show messages if their visibility is Everyone or their visibility is FOF and the two users are FOFs -->
             {% if message[6] == 'FOF' and fofStatus == 1 or message[6] == 'E' %}
             <tr>
-              <td>{{message[0]}}</td>
+              <td><a href="/users/{{message[0]}}">{{message[0]}}</a></td>
               <td>{{message[1]}}</td>
               <td>{{message[2]}}</td>
               <td>{{message[5]}}</td>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>YourHood</title>
+
+   
+    <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="http://getbootstrap.com/examples/jumbotron-narrow/jumbotron-narrow.css" rel="stylesheet">
+    <link href="../static/css/signup.css" rel="stylesheet">
+
+    <script src="../static/js/jquery-3.1.1.min.js"></script>
+    
+  </head>
+
+  <body>
+
+    <div class="jumbotron">
+      <h1>Creating new neighborhood for zipcode: {{zip}}</h1>
+    </div>
+
+    <div class="container">
+        <form class="form-signin" action="/newHood" method="post">
+          <input type="hidden" name="zip" id="zip" value="{{zip}}">
+          
+          <label for="name" class="sr-only">Name</label>
+          <input type="text" name="name" id="name" class="form-control" placeholder="name" required autofocus>
+
+          <label for="city" class="sr-only">City</label>
+          <input type="text" name="city" id="city" class="form-control" placeholder="city" required autofocus>
+
+          <label for="state" class="sr-only">State</label>
+          <input type="text" name="state" id="state" class="form-control" placeholder="state" required autofocus>
+
+          <label for="longitude" class="sr-only">Longitude</label>
+          <input type="text" name="longitude" id="longitude" class="form-control" placeholder="longitude" required autofocus>
+
+          <label for="latitude" class="sr-only">Latitude</label>
+          <input type="text" name="latitude" id="latitude" class="form-control" placeholder="latitude" required autofocus>
+
+          <button id="btnPostLocation" class="btn btn-lg btn-primary btn-block" type="submit">Create</button>
+        </form>  
+    </div>
+
+    <div class="container">
+      <div class="header">
+        <nav>
+          <ul class="nav nav-pills pull-right">
+            <li role="presentation"><a href="/">Home</a></li>
+            <li role="presentation"><a href="/showSignin">Sign In</a></li>
+            <li role="presentation"><a href="/showSignup">Sign Up</a></li>
+          </ul>
+        </nav>
+      </div>
+
+    </div>
+  </body>
+</html>
