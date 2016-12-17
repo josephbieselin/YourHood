@@ -61,7 +61,7 @@
       <table border="1">
       {% for requester in requests %}
         <tr>
-          <td>{{requester[0]}}<td>
+          <td><a href="/users/{{requester[0]}}">{{requester[0]}}</a><td>
           <td>
             <form action="/acceptFriend" method="post">
               <input type="hidden" name="requester" id="requester" value="{{requester[0]}}">
