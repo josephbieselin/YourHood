@@ -42,32 +42,21 @@ def home():
 
 
 '''
-<form action="/search" method="post">
-
 <label for="search_type" class="sr-only">Search Type</label>
 <select name="search_type" id="search_type">
   <option value="users">Users</option>
   <option value="hood_messages">Users</option>
   <option value="friend_messages">Users</option>
 </select>
-
-<div class="input-group">
-  <input type="text" name="search_value" id="search_value" class="form-control" placeholder="Search">
-  <div class="input-group-btn">
-    <button class="btn btn-default" type="submit"><i class="glyphicon glyphicon-search"></i></button>
-  </div>
-</div>
-
-</form>
 '''
 
-@app.route('/search')
+@app.route('/search', methods=['POST'])
 def search():
 	_type = request.form['search_type']
 	_value = request.form['search_value']
-	url = url_for("search_" + _type, value=_value)
+	# url = url_for("search_" + _type, value=_value)
+	url = "/search_" + _type + "/" + _value
 	return redirect(url)
-
 
 @app.route('/search_users/<string:value>')
 def searchUsers(value):
@@ -76,8 +65,11 @@ def searchUsers(value):
 		conn = mysql.connect()
 		cursor = conn.cursor()
 
+		# SQL LIKE filters with %filter_str%
+		value = '%' + value + '%'
+
 		# get the profile of the current session's user
-		cursor.callproc('showUsers', [value,])
+		cursor.callproc('showUsers', (value, session.get('user')))
 
 		data = cursor.fetchall()
 		# data = [[username], [username], ...]
@@ -107,27 +99,76 @@ def userPage(username):
 		# 0 = Nothing, 1 = Friends, 2 = Logged In User has Friend request from searched user, 3 = Logged In User has requested to be Friends with the searched user
 		friendStatus = 0
 
+		# 0 = Already Friends or  Not FOF, 1 = Friends of Friends
+		fofStatus = 0
+
 		# users are not friends
 		if len(data) is 0:
 			cursor.callproc('friendRequested', (session.get('user'), username))
 
 			data = cursor.fetchall()
 			# data = [[requester, requestee]]
-			requester = data[0][0]
-			requestee = data[0][1]
 
 			# there is some kind of request
 			if len(data) > 0:
+				requester = data[0][0]
+				requestee = data[0][1]
 				if requester == username:
 					friendStatus = 2
 				else:
 					friendStatus = 3
+
+			cursor.callproc('areFOFs', (username, session.get('user')))
+
+			data = cursor.fetchall()
+			# data = [[fof]]
+
+			if len(data) > 0:
+				fofStatus = 1
+
 		# users are friends
 		else:
 			friendStatus = 1
 
-		return render_template('userPage.html', otherUser = username, friendStatus = friendStatus)
+		cursor.callproc('showUserMessages', [username, ])
+
+		data = cursor.fetchall()
+		# data = [[poster, title, body, msgloc, multimedia, msgtime, visibility, reply], ....]
+
+		return render_template('userPage.html', user = session.get('user'), otherUser = username, friendStatus = friendStatus, fofStatus = fofStatus, messages = data)
 	
+	except Exception as e:
+		return render_template('error.html', error = str(e))
+
+	finally:
+		cursor.close()
+		conn.close()
+
+@app.route('/postMessageOnUserPage', methods=['POST'])
+def postMessageOnUserPage():
+	'''Posts a message onto the user's page'''
+	#title, body, visibility, otherUser
+	_user = request.form['user']
+	_title = request.form['title']
+	_body = request.form['body']
+	_visibility = request.form['visibility']
+
+	try:
+		conn = mysql.connect()
+		cursor = conn.cursor()
+
+		cursor.callproc('postMessage', (session.get('user'), _user, None, None, _title, _body, None, _visibility))
+
+		data = cursor.fetchall()
+		# data = [[username, friend]]
+
+		if session.get('user') == _user:
+			url = "/users/" + _user
+		else:
+			url = "/userHome"
+			
+		return redirect(url)
+
 	except Exception as e:
 		return render_template('error.html', error = str(e))
 
@@ -137,12 +178,11 @@ def userPage(username):
 
 def getProfileData(data, index):
 	'''Returns the value from the current user's profile'''
-	# # SQL NULL values are represented as None in Python
-	# if (data[0][index]) is None:
-	# 	return ''
-	# else:
-	# 	return data[0][index]
-	return data[0][index]
+	# SQL NULL values are represented as None in Python
+	if (data[0][index]) is None:
+		return ''
+	else:
+		return data[0][index]
 
 @app.route('/editProfile')
 def editProfile():
@@ -236,7 +276,38 @@ def friendRequests():
 		data = cursor.fetchall()
 		# data = [[requester], [requester], ...]
 
-		return render_template("friendRequests", requests = data)
+		return render_template("friendRequests.html", requests = data)
+
+	except Exception as e:
+		return render_template('error.html', error = str(e))
+
+	finally:
+		cursor.close()
+		conn.close()
+
+@app.route('/requestFriend', methods=['POST'])
+def requestFriend():
+	_requestee = request.form['requestFriend']
+
+	try:
+		conn = mysql.connect()
+		cursor = conn.cursor()
+
+		cursor.callproc('requestFriend', (session.get('user'), _requestee))
+
+		data = cursor.fetchall()
+		# data = [[requester], [requester], ...]
+
+		if len(data) is 0:
+			# commit the new user to the database
+			conn.commit()
+			return redirect('/users/' + _requestee)
+		else:
+			# don't commit any changes to the database
+			conn.rollback()
+			return render_template('error.html', error = "Invalid update: no changes made to your friend requests.")
+			## line below returns error description from MySQL
+			# return json.dumps({'error': str(data[0])})
 
 	except Exception as e:
 		return render_template('error.html', error = str(e))

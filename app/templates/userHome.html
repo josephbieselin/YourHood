@@ -23,8 +23,8 @@
         <label for="search_type" class="sr-only">Search Type</label>
         <select name="search_type" id="search_type">
           <option value="users">Users</option>
-          <option value="hood_messages">Users</option>
-          <option value="friend_messages">Users</option>
+          <option value="hood_messages">Neighborhood Messages</option>
+          <option value="friend_messages">Friend Messages</option>
         </select>
 
         <div class="input-group">
@@ -55,6 +55,27 @@
         <h1>Hi {{username}}!</h1>
       </div>
 
+        <form class="form-signin" action="/postMessageOnUserPage" method="post">
+          <input type="hidden" name="user" id="user" value="{{username}}">
+          
+          <label for="title" class="sr-only">Title</label>
+          <input type="text" name="title" id="title" class="form-control" placeholder="Title" autofocus>
+
+          <label for="body" class="sr-only">Body</label>
+          <textarea name="body" id="body" class="form-control" placeholder="Your message..." autofocus></textarea>
+          <br/>
+
+          <!-- TODO: Photo uploading -->
+
+          <label for="visibility" class="sr-only">Visibility</label>
+          <select name="visibility" id="visibility">
+            <option value="F">Friends</option>
+            <option value="FOF">Friends of Friends</option>
+            <option value="E">Everyone</option>
+          </select>
+
+          <button id="btnPostMessage" class="btn btn-lg btn-primary btn-block" type="submit">Post</button>
+        </form>  
 
       
 

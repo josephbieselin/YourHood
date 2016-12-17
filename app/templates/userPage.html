@@ -55,7 +55,7 @@
         <h1>{{otherUser}}'s page</h1>
       </div>
 
-      
+      <!-- Nothing -->
       {% if friendStatus == 0 %}
       <form action="/requestFriend" method="post">
         <div class="input-group">
@@ -67,10 +67,59 @@
       </form>
       {% endif %}
 
+      <!-- Friends -->
       {% if friendStatus == 1 %}
-      <h2>Friends</h2>
+        <h2>Friends</h2>
+        <br/>
+        <!-- Only friends can post messages on other user's pages -->
+        
+        <form class="form-signin" action="/postMessageOnUserPage" method="post">
+          <input type="hidden" name="user" id="user" value="{{otherUser}}">
+          
+          <label for="title" class="sr-only">Title</label>
+          <input type="text" name="title" id="title" class="form-control" placeholder="Title" autofocus>
+
+          <label for="body" class="sr-only">Body</label>
+          <textarea name="body" id="body" class="form-control" placeholder="Your message..." autofocus></textarea>
+          <br/>
+
+          <!-- TODO: Photo uploading -->
+
+          <label for="visibility" class="sr-only">Visibility</label>
+          <select name="visibility" id="visibility">
+            <option value="F">Friends</option>
+            <option value="FOF">Friends of Friends</option>
+            <option value="E">Everyone</option>
+          </select>
+
+          <button id="btnPostMessage" class="btn btn-lg btn-primary btn-block" type="submit">Post</button>
+        </form>  
+
+        <br/>
+
+        <h3>Messages</h3>
+
+        <table border=1>
+          <tr>
+            <th>Poster</th>
+            <th>Title</th>
+            <th>Body</th>
+            <!-- TODO: implement support for multimedia -->
+            <th>Post Time</th>
+          </tr>
+          {% for message in messages %}
+              <tr>
+                <td>{{message[0]}}</td>
+                <td>{{message[1]}}</td>
+                <td>{{message[2]}}</td>
+                <td>{{message[5]}}</td>
+              </tr>
+          {% endfor %}
+        </table>
+
       {% endif %}
 
+      <!-- Logged In User has Friend request from searched user -->
       {% if friendStatus == 2 %}
       <form action="/acceptFriend" method="post">
         <div class="input-group">
@@ -90,13 +139,40 @@
       </form>      
       {% endif %}
 
-      {% if friendStatus == 1 %}
-      <h2>Friend Request Sent</h2>
+      <!-- Logged In User has requested to be Friends with the searched user -->
+      {% if friendStatus == 3 %}
+        <h2>Friend Request Sent</h2>
       {% endif %}
 
 
+    <!-- Message posts for non-friends -->
+    {% if friendStatus != 1 %}
+      <br/>
+      <h3>Messages</h3>
 
-      
+      <table border=1>
+        <tr>
+          <th>Poster</th>
+          <th>Title</th>
+          <th>Body</th>
+          <!-- TODO: implement support for multimedia -->
+          <th>Post Time</th>
+        </tr>
+        {% for message in messages %}
+            <!-- Only show messages if their visibility is Everyone or their visibility is FOF and the two users are FOFs -->
+            {% if message[6] == 'FOF' and fofStatus == 1 or message[6] == 'E' %}
+            <tr>
+              <td>{{message[0]}}</td>
+              <td>{{message[1]}}</td>
+              <td>{{message[2]}}</td>
+              <td>{{message[5]}}</td>
+            </tr>
+            {% endif %}
+        {% endfor %}
+      </table>
+    {% endif %}
+
+
       <footer class="footer">
         <p>YourHood</p>
       </footer>
